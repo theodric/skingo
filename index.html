@@ -345,7 +345,7 @@
         squaresEls.push(div);
       }
       // Animation: pop in text in random order
-      const order = shuffle([...Array(GRID_SIZE * GRID_SIZE).keys()]);
+      const order = [12, ...shuffle([...Array(GRID_SIZE * GRID_SIZE).keys()].filter(i => i !== 12))];
       let filled = 0;
       const interval = ANIMATION_DURATION / (GRID_SIZE * GRID_SIZE);
       function fillNext() {
