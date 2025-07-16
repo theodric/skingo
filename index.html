@@ -74,6 +74,65 @@
       stroke-linecap: round;
       opacity: 0.85;
     }
+    .square.free {
+      background: #fff;
+      color: #222;
+      font-weight: bold;
+      border: 2px solid #e74c3c;
+      box-shadow: 0 0 0 3px #e74c3c44;
+    }
+    .square.free.filled {
+      background: #fff;
+    }
+    #bingo-btn {
+      margin-top: 2rem;
+      padding: 0.8em 2em;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      border: none;
+      background: #e74c3c;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #0004;
+      transition: background 0.2s;
+    }
+    #bingo-btn:active {
+      background: #c0392b;
+    }
+    #bingo-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    #bingo-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    #bingo-overlay h2 {
+      color: #fff;
+      font-size: 5vw;
+      text-shadow: 0 4px 32px #e74c3c, 0 0 8px #fff;
+      margin: 0;
+      letter-spacing: 8px;
+      font-weight: 900;
+      text-align: center;
+    }
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+      display: block;
+    }
     @media (max-width: 600px) {
       #bingo {
         max-width: 98vw;
@@ -90,6 +149,9 @@
 <body>
   <h1>Skinwalker Ranch BINGO</h1>
   <div id="bingo"></div>
+  <button id="bingo-btn">New Card</button>
+  <div id="bingo-overlay"><h2>BINGO!</h2></div>
+  <canvas id="confetti-canvas"></canvas>
   <script>
     // Embedded squares.txt lines
     const SQUARES = [
@@ -158,16 +220,106 @@
       return grid;
     }
 
+    // Track marked squares
+    let marked = Array(GRID_SIZE * GRID_SIZE).fill(false);
+    let squaresEls = [];
+    let bingoActive = false;
+
+    function isBingo(marked) {
+      // Check rows, columns, diagonals
+      for (let r = 0; r < GRID_SIZE; r++) {
+        if ([0,1,2,3,4].every(c => marked[r*5+c])) return true;
+      }
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if ([0,1,2,3,4].every(r => marked[r*5+c])) return true;
+      }
+      // Diagonals
+      if ([0,6,12,18,24].every(i => marked[i])) return true;
+      if ([4,8,12,16,20].every(i => marked[i])) return true;
+      return false;
+    }
+
+    function showBingo() {
+      document.getElementById('bingo-overlay').classList.add('active');
+      startConfetti();
+    }
+    function hideBingo() {
+      document.getElementById('bingo-overlay').classList.remove('active');
+      stopConfetti();
+    }
+
+    // Confetti animation (simple canvas)
+    let confettiTimer = null;
+    let confettiParticles = [];
+    function startConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      confettiParticles = Array.from({length: 180}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        r: 6 + Math.random() * 8,
+        d: 2 + Math.random() * 4,
+        color: `hsl(${Math.random()*360},90%,60%)`,
+        tilt: Math.random() * 10 - 5,
+        tiltAngle: 0,
+        tiltAngleInc: (Math.random() * 0.07) + 0.03
+      }));
+      function draw() {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for (const p of confettiParticles) {
+          ctx.beginPath();
+          ctx.ellipse(p.x, p.y, p.r, p.r/2, p.tilt, 0, 2*Math.PI);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+      }
+      function update() {
+        for (const p of confettiParticles) {
+          p.y += p.d;
+          p.x += Math.sin(p.tilt) * 2;
+          p.tilt += p.tiltAngleInc;
+          if (p.y > canvas.height) {
+            p.x = Math.random() * canvas.width;
+            p.y = -10;
+          }
+        }
+      }
+      function loop() {
+        update();
+        draw();
+        confettiTimer = requestAnimationFrame(loop);
+      }
+      loop();
+    }
+    function stopConfetti() {
+      if (confettiTimer) cancelAnimationFrame(confettiTimer);
+      confettiTimer = null;
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('confetti-canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
     // Animate filling the grid
     function animateGridFill(grid) {
-      const squares = [];
+      squaresEls = [];
       bingo.innerHTML = '';
+      marked = Array(GRID_SIZE * GRID_SIZE).fill(false);
+      bingoActive = false;
+      hideBingo();
       for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
         const div = document.createElement('div');
         div.className = 'square';
+        if (i === 12) div.classList.add('free');
         div.dataset.idx = i;
         bingo.appendChild(div);
-        squares.push(div);
+        squaresEls.push(div);
       }
       // Animation: pop in text in random order
       const order = shuffle([...Array(GRID_SIZE * GRID_SIZE).keys()]);
@@ -176,7 +328,7 @@
       function fillNext() {
         if (filled >= order.length) return;
         const idx = order[filled];
-        const div = squares[idx];
+        const div = squaresEls[idx];
         div.textContent = grid[idx];
         div.classList.add('filled');
         filled++;
@@ -186,24 +338,38 @@
       }
       fillNext();
       // Add click handler for X toggle
-      bingo.addEventListener('click', function(e) {
+      bingo.onclick = function(e) {
+        if (bingoActive) return;
         const target = e.target.closest('.square');
         if (!target || !target.classList.contains('filled')) return;
+        const idx = +target.dataset.idx;
         if (target.querySelector('.x-mark')) {
           target.querySelector('.x-mark').remove();
+          marked[idx] = false;
         } else {
           const x = document.createElement('span');
           x.className = 'x-mark';
           x.innerHTML = `<svg viewBox="0 0 100 100"><line x1="15" y1="15" x2="85" y2="85" /><line x1="85" y1="15" x2="15" y2="85" /></svg>`;
           target.appendChild(x);
+          marked[idx] = true;
         }
-      });
+        // Always mark center as filled
+        marked[12] = true;
+        if (isBingo(marked)) {
+          bingoActive = true;
+          showBingo();
+        }
+      };
     }
 
     // On load
     window.addEventListener('DOMContentLoaded', () => {
       const grid = getBingoSquares();
       animateGridFill(grid);
+      document.getElementById('bingo-btn').onclick = () => {
+        const grid = getBingoSquares();
+        animateGridFill(grid);
+      };
     });
   </script>
 </body>
