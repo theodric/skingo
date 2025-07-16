@@ -14,7 +14,7 @@ LIDAR scan it
 Fire up UFODAP
 Check Geiger counter 
 Check gamma rays
-Check FLIR (thermal)
+Check FLIR thermal
 Check security cam
 Drive a UTV toward it 
 Drive a Jeep toward it
