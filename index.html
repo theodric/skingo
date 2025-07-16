@@ -344,7 +344,7 @@
         const idx = order[filled];
         const div = squaresEls[idx];
         // Use a span for text to allow scaling
-        if (i === 12) {
+        if (idx === 12) {
           div.innerHTML = `<span class='square-text'>FREE\nSQUARE</span>`;
         } else {
           div.innerHTML = `<span class='square-text'>${grid[idx]}</span>`;
