@@ -5,8 +5,10 @@ Fly a SINGLE drone over it
 Fly a drone SWARM over it
 Fly a helicopter over it
 Float a balloon over it
-SDR on 1.6GHz (earth to space and space to earth)
+SDR on 1.6GHz
 SDR on 1.2GHz
+HAM radio time
+Try and contact the aliens
 Scan it with LIDAR
 Fire up the UFODAP
 Check the Geiger counter 
@@ -15,7 +17,7 @@ Check the FLIR (thermal camera)
 Check the security cameras
 Drive a UTV toward it 
 Drive a Jeep toward it
-Take a walk in the dark and get scared
+Take a walk in the dark
 Let us pray
 Call a psychic
 Equipment failure 

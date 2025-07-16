@@ -149,7 +149,6 @@
 <body>
   <h1>Skinwalker Ranch BINGO</h1>
   <div id="bingo"></div>
-  <button id="bingo-btn">New Card</button>
   <div id="bingo-overlay"><h2>BINGO!</h2></div>
   <canvas id="confetti-canvas"></canvas>
   <script>
@@ -366,10 +365,6 @@
     window.addEventListener('DOMContentLoaded', () => {
       const grid = getBingoSquares();
       animateGridFill(grid);
-      document.getElementById('bingo-btn').onclick = () => {
-        const grid = getBingoSquares();
-        animateGridFill(grid);
-      };
     });
   </script>
 </body>
