@@ -318,7 +318,7 @@
       if (!textEl) return;
       let fontSize = parseFloat(window.getComputedStyle(div).fontSize);
       const isMobile = window.innerWidth <= 600;
-      const minFontSize = div.classList.contains('free') ? (isMobile ? 0.8 : 1.0) : (isMobile ? 0.65 : 0.8); // em
+      const minFontSize = div.classList.contains('free') ? (isMobile ? 0.8 : 1.0) : (isMobile ? 0.7 : 0.8); // em
       textEl.style.fontSize = fontSize + 'px';
       // Only shrink if text actually overflows
       const maxIterations = isMobile ? 8 : 6;
