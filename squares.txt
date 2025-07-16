@@ -1,21 +1,21 @@
 Shoot a rocket at it
 Shoot a laser at it
 Drill a hole through it
-Fly a SINGLE drone over it
-Fly a drone SWARM over it
-Fly a helicopter over it
+Fly SINGLE drone over it
+Fly drone SWARM over it
+Fly helicopter over it
 Float a balloon over it
 WHAT IS THAT!?
 SDR on 1.6GHz
 SDR on 1.2GHz
 HAM radio time
-Try and contact the aliens
-Scan it with LIDAR
-Fire up the UFODAP
-Check the Geiger counter 
-Check the Gamma ray detector 
-Check the FLIR (thermal camera)
-Check the security cameras
+Contact the aliens
+LIDAR scan it
+Fire up UFODAP
+Check Geiger counter 
+Check Gamma ray detector 
+Check FLIR (thermal)
+Check security cameras
 Drive a UTV toward it 
 Drive a Jeep toward it
 Take a walk in the dark, get scared
