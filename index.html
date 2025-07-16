@@ -95,6 +95,9 @@
       box-shadow: 0 0 0 3px #e74c3c44;
       padding-left: 16px;
       padding-right: 16px;
+      white-space: pre-line;
+      word-break: normal;
+      overflow-wrap: normal;
     }
     .square.free.filled {
       background: #fff;
@@ -341,7 +344,11 @@
         const idx = order[filled];
         const div = squaresEls[idx];
         // Use a span for text to allow scaling
-        div.innerHTML = `<span class='square-text'>${grid[idx]}</span>`;
+        if (i === 12) {
+          div.innerHTML = `<span class='square-text'>FREE\nSQUARE</span>`;
+        } else {
+          div.innerHTML = `<span class='square-text'>${grid[idx]}</span>`;
+        }
         div.classList.add('filled');
         fitTextToSquare(div);
         filled++;
