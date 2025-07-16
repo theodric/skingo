@@ -152,39 +152,19 @@
   <div id="bingo-overlay"><h2>BINGO!</h2></div>
   <canvas id="confetti-canvas"></canvas>
   <script>
-    // Embedded squares.txt lines
-    const SQUARES = [
-      "Shoot a rocket at it",
-      "Shoot a laser at it",
-      "Drill a hole through it",
-      "Fly a SINGLE drone over it",
-      "Fly a drone SWARM over it",
-      "Fly a helicopter over it",
-      "Float a balloon over it",
-      "SDR on 1.6GHz (earth to space and space to earth)",
-      "SDR on 1.2GHz",
-      "Scan it with LIDAR",
-      "Fire up the UFODAP",
-      "Check the Geiger counter ",
-      "Check the Gamma ray detector ",
-      "Check the FLIR (thermal camera)",
-      "Check the security cameras",
-      "Drive a UTV toward it ",
-      "Drive a Jeep toward it",
-      "Take a walk in the dark and get scared",
-      "Let us pray",
-      "Call a psychic",
-      "Equipment failure ",
-      "Bubble mentioned ",
-      "Mesa mentioned ",
-      "Borehole mentioned ",
-      "Data corruption mentioned ",
-      "Cryptid alert",
-      "UAP spotted",
-      "Brandon Fugal helicopter visit",
-      "Random expert visit",
-      "UFO celeb visit"
-    ];
+    // Load squares.txt at runtime
+    let SQUARES = [];
+    function fetchSquaresTxt() {
+      return fetch('squares.txt')
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to load squares.txt');
+          return response.text();
+        })
+        .then(text => {
+          // Split by newlines, trim, and filter out empty lines
+          return text.split('\n').map(line => line.trim()).filter(Boolean);
+        });
+    }
 
     const GRID_SIZE = 5;
     const FREE_TEXT = 'FREE SQUARE';
@@ -363,8 +343,13 @@
 
     // On load
     window.addEventListener('DOMContentLoaded', () => {
-      const grid = getBingoSquares();
-      animateGridFill(grid);
+      fetchSquaresTxt().then(squares => {
+        SQUARES = squares;
+        const grid = getBingoSquares();
+        animateGridFill(grid);
+      }).catch(err => {
+        alert('Could not load squares.txt: ' + err.message);
+      });
     });
   </script>
 </body>
