@@ -54,8 +54,8 @@
       overflow: hidden;
       /* Allow text to shrink */
       line-height: 1.1;
-      word-break: break-word;
-      hyphens: auto;
+      word-break: normal;
+      overflow-wrap: break-word;
     }
     .square .square-text {
       width: 100%;
@@ -63,8 +63,8 @@
       font-size: inherit;
       transition: font-size 0.2s;
       line-height: 1.1;
-      word-break: break-word;
-      hyphens: auto;
+      word-break: normal;
+      overflow-wrap: break-word;
     }
     .square.filled {
       background: #333;
@@ -93,6 +93,8 @@
       font-weight: bold;
       border: 2px solid #e74c3c;
       box-shadow: 0 0 0 3px #e74c3c44;
+      padding-left: 16px;
+      padding-right: 16px;
     }
     .square.free.filled {
       background: #fff;
@@ -302,10 +304,13 @@
       const textEl = div.querySelector('.square-text');
       if (!textEl) return;
       let fontSize = parseFloat(window.getComputedStyle(div).fontSize);
+      const minFontSize = div.classList.contains('free') ? 1.0 : 0.7; // em
       textEl.style.fontSize = fontSize + 'px';
-      for (let i = 0; i < 8; i++) {
-        if (textEl.scrollHeight > div.clientHeight - 8 || textEl.scrollWidth > div.clientWidth - 8) {
-          fontSize *= 0.92;
+      // Only shrink if absolutely necessary, and not below minFontSize
+      for (let i = 0; i < 4; i++) {
+        if ((textEl.scrollHeight > div.clientHeight - 8 || textEl.scrollWidth > div.clientWidth - 8) && fontSize > minFontSize * 16) {
+          fontSize *= 0.93;
+          if (fontSize < minFontSize * 16) fontSize = minFontSize * 16;
           textEl.style.fontSize = fontSize + 'px';
         } else {
           break;
