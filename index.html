@@ -317,16 +317,17 @@
       if (!textEl) return;
       let fontSize = parseFloat(window.getComputedStyle(div).fontSize);
       const isMobile = window.innerWidth <= 600;
-      const minFontSize = div.classList.contains('free') ? (isMobile ? 0.65 : 1.0) : (isMobile ? 0.4 : 0.8); // em
+      const minFontSize = div.classList.contains('free') ? (isMobile ? 0.8 : 1.0) : (isMobile ? 0.6 : 0.8); // em
       textEl.style.fontSize = fontSize + 'px';
-      // More aggressive shrinking to prevent word wrapping
-      const maxIterations = isMobile ? 12 : 6;
+      // Only shrink if text actually overflows
+      const maxIterations = isMobile ? 8 : 6;
       for (let i = 0; i < maxIterations; i++) {
-        if ((textEl.scrollHeight > div.clientHeight - 4 || textEl.scrollWidth > div.clientWidth - 4) && fontSize > minFontSize * 16) {
-          fontSize *= (isMobile ? 0.8 : 0.9);
+        const overflows = textEl.scrollHeight > div.clientHeight - 6 || textEl.scrollWidth > div.clientWidth - 6;
+        if (overflows && fontSize > minFontSize * 16) {
+          fontSize *= 0.9;
           if (fontSize < minFontSize * 16) fontSize = minFontSize * 16;
           textEl.style.fontSize = fontSize + 'px';
-        } else {
+        } else if (!overflows) {
           break;
         }
       }
