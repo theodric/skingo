@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skinwalker Ranch BINGO</title>
+  <style>
+    body {
+      background: #181818;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+    }
+    #bingo {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(60px, 1fr));
+      grid-template-rows: repeat(5, minmax(60px, 1fr));
+      gap: 8px;
+      width: 95vw;
+      max-width: 500px;
+      aspect-ratio: 1/1;
+      margin: 0 auto;
+      background: #222;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px #0008;
+      padding: 8px;
+    }
+    .square {
+      background: #292929;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px #0004;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      text-align: center;
+      padding: 8px;
+      min-height: 0;
+      min-width: 0;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+      overflow: hidden;
+    }
+    .square.filled {
+      background: #333;
+      transition: background 0.3s;
+    }
+    .square .x-mark {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .x-mark svg {
+      width: 80%;
+      height: 80%;
+      stroke: #e74c3c;
+      stroke-width: 12;
+      stroke-linecap: round;
+      opacity: 0.85;
+    }
+    @media (max-width: 600px) {
+      #bingo {
+        max-width: 98vw;
+        gap: 4px;
+        padding: 4px;
+      }
+      .square {
+        font-size: 0.95rem;
+        padding: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Skinwalker Ranch BINGO</h1>
+  <div id="bingo"></div>
+  <script>
+    // Embedded squares.txt lines
+    const SQUARES = [
+      "Shoot a rocket at it",
+      "Shoot a laser at it",
+      "Drill a hole through it",
+      "Fly a SINGLE drone over it",
+      "Fly a drone SWARM over it",
+      "Fly a helicopter over it",
+      "Float a balloon over it",
+      "SDR on 1.6GHz (earth to space and space to earth)",
+      "SDR on 1.2GHz",
+      "Scan it with LIDAR",
+      "Fire up the UFODAP",
+      "Check the Geiger counter ",
+      "Check the Gamma ray detector ",
+      "Check the FLIR (thermal camera)",
+      "Check the security cameras",
+      "Drive a UTV toward it ",
+      "Drive a Jeep toward it",
+      "Take a walk in the dark and get scared",
+      "Let us pray",
+      "Call a psychic",
+      "Equipment failure ",
+      "Bubble mentioned ",
+      "Mesa mentioned ",
+      "Borehole mentioned ",
+      "Data corruption mentioned ",
+      "Cryptid alert",
+      "UAP spotted",
+      "Brandon Fugal helicopter visit",
+      "Random expert visit",
+      "UFO celeb visit"
+    ];
+
+    const GRID_SIZE = 5;
+    const FREE_TEXT = 'FREE SQUARE';
+    const ANIMATION_DURATION = 7000; // ms
+    const bingo = document.getElementById('bingo');
+
+    // Helper: shuffle array in-place
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Prepare squares: 24 random, center is free
+    function getBingoSquares() {
+      const squares = [...SQUARES];
+      shuffle(squares);
+      const selected = squares.slice(0, GRID_SIZE * GRID_SIZE - 1); // 24
+      const grid = [];
+      let idx = 0;
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          if (r === 2 && c === 2) {
+            grid.push(FREE_TEXT);
+          } else {
+            grid.push(selected[idx++]);
+          }
+        }
+      }
+      return grid;
+    }
+
+    // Animate filling the grid
+    function animateGridFill(grid) {
+      const squares = [];
+      bingo.innerHTML = '';
+      for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+        const div = document.createElement('div');
+        div.className = 'square';
+        div.dataset.idx = i;
+        bingo.appendChild(div);
+        squares.push(div);
+      }
+      // Animation: pop in text in random order
+      const order = shuffle([...Array(GRID_SIZE * GRID_SIZE).keys()]);
+      let filled = 0;
+      const interval = ANIMATION_DURATION / (GRID_SIZE * GRID_SIZE);
+      function fillNext() {
+        if (filled >= order.length) return;
+        const idx = order[filled];
+        const div = squares[idx];
+        div.textContent = grid[idx];
+        div.classList.add('filled');
+        filled++;
+        if (filled < order.length) {
+          setTimeout(fillNext, interval);
+        }
+      }
+      fillNext();
+      // Add click handler for X toggle
+      bingo.addEventListener('click', function(e) {
+        const target = e.target.closest('.square');
+        if (!target || !target.classList.contains('filled')) return;
+        if (target.querySelector('.x-mark')) {
+          target.querySelector('.x-mark').remove();
+        } else {
+          const x = document.createElement('span');
+          x.className = 'x-mark';
+          x.innerHTML = `<svg viewBox="0 0 100 100"><line x1="15" y1="15" x2="85" y2="85" /><line x1="85" y1="15" x2="15" y2="85" /></svg>`;
+          target.appendChild(x);
+        }
+      });
+    }
+
+    // On load
+    window.addEventListener('DOMContentLoaded', () => {
+      const grid = getBingoSquares();
+      animateGridFill(grid);
+    });
+  </script>
+</body>
+</html> 
