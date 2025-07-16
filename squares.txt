@@ -6,8 +6,8 @@ Fly drone SWARM over it
 Fly helicopter over it
 Float a balloon over it
 WHAT IS THAT!?
-SDR on 1.6GHz
-SDR on 1.2GHz
+ONE POINT SIX GIGAHERTZ
+ONE POINT TWO GIGAHERTZ
 HAM radio time
 Contact the aliens
 LIDAR scan it
