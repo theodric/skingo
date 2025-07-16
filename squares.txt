@@ -13,7 +13,7 @@ Contact the aliens
 LIDAR scan it
 Fire up UFODAP
 Check Geiger counter 
-Check Gamma ray detector 
+Check gamma rays
 Check FLIR (thermal)
 Check security cameras
 Drive a UTV toward it 
@@ -22,10 +22,10 @@ Take a walk in the dark, get scared
 Let us pray
 Call a psychic
 Equipment failure 
-Bubble mentioned 
-Mesa mentioned 
-Borehole mentioned 
-Data corruption mentioned 
+Bubble mention
+Mesa mentio 
+Borehole mention
+Data corruption
 Cryptid alert
 UAP spotted
 Brandon Fugal helicopter visit
