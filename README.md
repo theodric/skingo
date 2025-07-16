@@ -1,7 +1,7 @@
 # skingo
 Generic browser bingo game framework, supplied with a bingo file inspired by the Skinwalker show.  
 
-!(screenshot.png)
+![screenshot](/screenshot.png)
 
 100% javascript and HTML. Works pretty well on both desktop and mobile.  
 
