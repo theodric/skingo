@@ -64,7 +64,8 @@
       transition: font-size 0.2s;
       line-height: 1.1;
       word-break: normal;
-      overflow-wrap: break-word;
+      overflow-wrap: normal;
+      white-space: nowrap;
     }
     .square.filled {
       background: #333;
@@ -315,12 +316,12 @@
       const textEl = div.querySelector('.square-text');
       if (!textEl) return;
       let fontSize = parseFloat(window.getComputedStyle(div).fontSize);
-      const minFontSize = div.classList.contains('free') ? 1.0 : 0.7; // em
+      const minFontSize = div.classList.contains('free') ? 1.0 : 0.8; // em
       textEl.style.fontSize = fontSize + 'px';
-      // Only shrink if absolutely necessary, and not below minFontSize
-      for (let i = 0; i < 4; i++) {
+      // More aggressive shrinking to prevent word wrapping
+      for (let i = 0; i < 6; i++) {
         if ((textEl.scrollHeight > div.clientHeight - 8 || textEl.scrollWidth > div.clientWidth - 8) && fontSize > minFontSize * 16) {
-          fontSize *= 0.93;
+          fontSize *= 0.9;
           if (fontSize < minFontSize * 16) fontSize = minFontSize * 16;
           textEl.style.fontSize = fontSize + 'px';
         } else {
