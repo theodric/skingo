@@ -1,8 +1,7 @@
 Shoot a rocket at it
 Shoot a laser at it
 Drill a hole through it
-Fly SINGLE drone over it
-Fly drone SWARM over it
+Fly a drone over it
 Fly helicopter over it
 Float a balloon over it
 WHAT IS THAT!?
