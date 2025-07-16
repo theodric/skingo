@@ -317,13 +317,13 @@
       if (!textEl) return;
       let fontSize = parseFloat(window.getComputedStyle(div).fontSize);
       const isMobile = window.innerWidth <= 600;
-      const minFontSize = div.classList.contains('free') ? (isMobile ? 0.75 : 1.0) : (isMobile ? 0.6 : 0.8); // em
+      const minFontSize = div.classList.contains('free') ? (isMobile ? 0.7 : 1.0) : (isMobile ? 0.5 : 0.8); // em
       textEl.style.fontSize = fontSize + 'px';
       // More aggressive shrinking to prevent word wrapping
-      const maxIterations = isMobile ? 8 : 6;
+      const maxIterations = isMobile ? 10 : 6;
       for (let i = 0; i < maxIterations; i++) {
         if ((textEl.scrollHeight > div.clientHeight - 8 || textEl.scrollWidth > div.clientWidth - 8) && fontSize > minFontSize * 16) {
-          fontSize *= (isMobile ? 0.85 : 0.9);
+          fontSize *= (isMobile ? 0.82 : 0.9);
           if (fontSize < minFontSize * 16) fontSize = minFontSize * 16;
           textEl.style.fontSize = fontSize + 'px';
         } else {
