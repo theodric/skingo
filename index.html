@@ -6,7 +6,7 @@
   <title>S K I N G O</title>
   <style>
     body {
-      background: linear-gradient(rgba(24,24,24,0.92), rgba(24,24,24,0.92)), url('../meemeemee.png') center center / cover no-repeat;
+      background: #181818;
       color: #fff;
       font-family: 'Segoe UI', Arial, sans-serif;
       display: flex;
@@ -184,6 +184,18 @@
   <div id="bingo"></div>
   <div id="bingo-overlay"><h2>BINGO!</h2></div>
   <canvas id="confetti-canvas"></canvas>
+  <script>
+    // Try to load the background image
+    const bgImg = new window.Image();
+    bgImg.onload = function() {
+      document.body.style.background =
+        "linear-gradient(rgba(24,24,24,0.92), rgba(24,24,24,0.92)), url('../meemeemee.png') center center / cover no-repeat";
+    };
+    bgImg.onerror = function() {
+      document.body.style.background = "#181818";
+    };
+    bgImg.src = "../meemeemee.png";
+  </script>
   <script>
     // Load squares.txt at runtime
     let SQUARES = [];
