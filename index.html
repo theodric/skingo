@@ -133,6 +133,40 @@
     #bingo-btn:active {
       background: #c0392b;
     }
+    #file-selector {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    #file-selector label {
+      color: #00ff66;
+      font-weight: bold;
+      text-shadow: 0 0 8px #00ff66;
+    }
+    #file-select {
+      background: #000;
+      color: #00ff66;
+      border: 2px solid #00ff66;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 0 8px #00ff66;
+      transition: all 0.2s;
+    }
+    #file-select:hover {
+      box-shadow: 0 0 12px #00ff66;
+      background: #111;
+    }
+    #file-select:focus {
+      outline: none;
+      box-shadow: 0 0 12px #00ff66, 0 0 0 2px #00ff66;
+    }
+    #file-select option {
+      background: #000;
+      color: #00ff66;
+    }
     #bingo-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -181,6 +215,12 @@
 </head>
 <body>
   <h1>S K I N G O</h1>
+  <div id="file-selector">
+    <label for="file-select">Select Theme:</label>
+    <select id="file-select">
+      <option value="">Loading...</option>
+    </select>
+  </div>
   <div id="bingo"></div>
   <div id="bingo-overlay"><h2>BINGO!</h2></div>
   <canvas id="confetti-canvas"></canvas>
@@ -197,24 +237,18 @@
     bgImg.src = "../meemeemee.png";
   </script>
   <script>
-    // Load squares.txt at runtime
+    // Global variables
     let SQUARES = [];
-    function fetchSquaresTxt() {
-      return fetch('squares.txt')
-        .then(response => {
-          if (!response.ok) throw new Error('Failed to load squares.txt');
-          return response.text();
-        })
-        .then(text => {
-          // Split by newlines, trim, and filter out empty lines
-          return text.split('\n').map(line => line.trim()).filter(Boolean);
-        });
-    }
-
+    let currentFile = '';
+    let audioContext = null;
+    let audioBuffer = null;
+    
     const GRID_SIZE = 5;
     const FREE_TEXT = 'FREE SQUARE';
+    const HOUSE_FREE_TEXT = 'House Takes\nVicodin\n(FREE)';
     const ANIMATION_DURATION = 2500; // ms
     const bingo = document.getElementById('bingo');
+    const fileSelect = document.getElementById('file-select');
 
     // Helper: shuffle array in-place
     function shuffle(arr) {
@@ -223,6 +257,135 @@
         [arr[i], arr[j]] = [arr[j], arr[i]];
       }
       return arr;
+    }
+
+    // Get available .txt files from squares directory
+    async function getAvailableFiles() {
+      try {
+        // Try to fetch a list of files - we'll need to implement this differently
+        // For now, we'll try common file names and see what exists
+        const possibleFiles = ['skinwalker.txt', 'house.txt', 'general.txt', 'custom.txt'];
+        const availableFiles = [];
+        
+        for (const file of possibleFiles) {
+          try {
+            const response = await fetch(`squares/${file}`);
+            if (response.ok) {
+              availableFiles.push(file);
+            }
+          } catch (e) {
+            // File doesn't exist, continue
+          }
+        }
+        
+        // If no files found, try the original squares.txt
+        if (availableFiles.length === 0) {
+          try {
+            const response = await fetch('squares.txt');
+            if (response.ok) {
+              availableFiles.push('squares.txt');
+            }
+          } catch (e) {
+            // No files available
+          }
+        }
+        
+        return availableFiles.sort();
+      } catch (error) {
+        console.error('Error getting available files:', error);
+        return [];
+      }
+    }
+
+    // Load squares from a specific file
+    async function loadSquaresFromFile(filename) {
+      try {
+        const response = await fetch(filename.startsWith('squares/') ? filename : `squares/${filename}`);
+        if (!response.ok) throw new Error(`Failed to load ${filename}`);
+        const text = await response.text();
+        return text.split('\n').map(line => line.trim()).filter(Boolean);
+      } catch (error) {
+        console.error(`Error loading ${filename}:`, error);
+        return [];
+      }
+    }
+
+    // Populate dropdown with available files
+    async function populateFileSelector() {
+      const files = await getAvailableFiles();
+      fileSelect.innerHTML = '';
+      
+      if (files.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No files available';
+        fileSelect.appendChild(option);
+        return;
+      }
+      
+      // Default to skinwalker.txt if it exists, otherwise first file alphabetically
+      let defaultFile = files.find(f => f === 'skinwalker.txt') || files[0];
+      
+      files.forEach(file => {
+        const option = document.createElement('option');
+        option.value = file;
+        option.textContent = file.replace('.txt', '').replace(/([A-Z])/g, ' $1').trim();
+        fileSelect.appendChild(option);
+      });
+      
+      fileSelect.value = defaultFile;
+      await loadAndPopulateBoard(defaultFile);
+    }
+
+    // Load audio file
+    async function loadAudio() {
+      try {
+        // Try to load both kazoo files
+        const kazooFiles = ['snd/kazoo1.mp3', 'snd/kazoo2.mp3'];
+        const audioBuffers = [];
+        
+        for (const file of kazooFiles) {
+          try {
+            const response = await fetch(file);
+            if (response.ok) {
+              const arrayBuffer = await response.arrayBuffer();
+              if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+              }
+              const buffer = await audioContext.decodeAudioData(arrayBuffer);
+              audioBuffers.push(buffer);
+            }
+          } catch (e) {
+            console.warn(`${file} not found`);
+          }
+        }
+        
+        if (audioBuffers.length > 0) {
+          audioBuffer = audioBuffers;
+        } else {
+          console.warn('No kazoo files found');
+        }
+      } catch (error) {
+        console.warn('Could not load kazoo files:', error);
+      }
+    }
+
+    // Play random kazoo sound
+    function playKazoo() {
+      if (audioContext && audioBuffer && audioBuffer.length > 0) {
+        try {
+          // Randomly select one of the available kazoo sounds
+          const randomIndex = Math.floor(Math.random() * audioBuffer.length);
+          const selectedBuffer = audioBuffer[randomIndex];
+          
+          const source = audioContext.createBufferSource();
+          source.buffer = selectedBuffer;
+          source.connect(audioContext.destination);
+          source.start(0);
+        } catch (error) {
+          console.warn('Could not play kazoo sound:', error);
+        }
+      }
     }
 
     // Prepare squares: 24 random, center is free
@@ -266,7 +429,9 @@
     function showBingo() {
       document.getElementById('bingo-overlay').classList.add('active');
       startConfetti();
+      playKazoo();
     }
+    
     function hideBingo() {
       document.getElementById('bingo-overlay').classList.remove('active');
       stopConfetti();
@@ -352,12 +517,27 @@
       }
     }
 
+    async function loadAndPopulateBoard(filename) {
+      if (filename === currentFile) return;
+      
+      currentFile = filename;
+      SQUARES = await loadSquaresFromFile(filename);
+      
+      if (SQUARES.length === 0) {
+        console.error('No squares loaded from', filename);
+        return;
+      }
+      
+      animateGridFill(getBingoSquares());
+    }
+
     function animateGridFill(grid) {
       squaresEls = [];
       bingo.innerHTML = '';
       marked = Array(GRID_SIZE * GRID_SIZE).fill(false);
       bingoActive = false;
       hideBingo();
+      
       for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
         const div = document.createElement('div');
         div.className = 'square';
@@ -366,33 +546,43 @@
         bingo.appendChild(div);
         squaresEls.push(div);
       }
+      
       // Animation: pop in text in random order
       const order = [...shuffle([...Array(GRID_SIZE * GRID_SIZE).keys()].filter(i => i !== 12)), 12];
       let filled = 0;
       const interval = ANIMATION_DURATION / (GRID_SIZE * GRID_SIZE);
+      
       function fillNext() {
         if (filled >= order.length) return;
         const idx = order[filled];
         const div = squaresEls[idx];
+        
         // Use a span for text to allow scaling
         if (idx === 12) {
-          div.innerHTML = `<span class='square-text'>FREE\nSQUARE</span>`;
+          // Special text for house.txt
+          const freeText = currentFile === 'house.txt' ? HOUSE_FREE_TEXT : FREE_TEXT;
+          div.innerHTML = `<span class='square-text'>${freeText}</span>`;
         } else {
           div.innerHTML = `<span class='square-text'>${grid[idx]}</span>`;
         }
+        
         div.classList.add('filled');
         fitTextToSquare(div);
         filled++;
+        
         if (filled < order.length) {
           setTimeout(fillNext, interval);
         }
       }
+      
       fillNext();
+      
       // Add click handler for X toggle
       bingo.onclick = function(e) {
         if (bingoActive) return;
         const target = e.target.closest('.square');
         if (!target || !target.classList.contains('filled')) return;
+        
         const idx = +target.dataset.idx;
         if (target.querySelector('.x-mark')) {
           target.querySelector('.x-mark').remove();
@@ -400,12 +590,14 @@
         } else {
           const x = document.createElement('span');
           x.className = 'x-mark';
-          x.innerHTML = `<svg viewBox=\"0 0 100 100\"><line x1=\"15\" y1=\"15\" x2=\"85\" y2=\"85\" /><line x1=\"85\" y1=\"15\" x2=\"15\" y2=\"85\" /></svg>`;
+          x.innerHTML = `<svg viewBox="0 0 100 100"><line x1="15" y1="15" x2="85" y2="85" /><line x1="85" y1="15" x2="15" y2="85" /></svg>`;
           target.appendChild(x);
           marked[idx] = true;
         }
+        
         // Always mark center as filled
         marked[12] = true;
+        
         if (isBingo(marked)) {
           bingoActive = true;
           showBingo();
@@ -413,15 +605,18 @@
       };
     }
 
+    // File selector change handler
+    fileSelect.addEventListener('change', async function() {
+      const selectedFile = this.value;
+      if (selectedFile) {
+        await loadAndPopulateBoard(selectedFile);
+      }
+    });
+
     // On load
-    window.addEventListener('DOMContentLoaded', () => {
-      fetchSquaresTxt().then(squares => {
-        SQUARES = squares;
-        const grid = getBingoSquares();
-        animateGridFill(grid);
-      }).catch(err => {
-        alert('Could not load squares.txt: ' + err.message);
-      });
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadAudio();
+      await populateFileSelector();
     });
   </script>
 </body>
