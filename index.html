@@ -324,8 +324,8 @@
         return;
       }
       
-      // Default to skinwalker.txt if it exists, otherwise first file alphabetically
-      let defaultFile = files.find(f => f === 'skinwalker.txt') || files[0];
+      // Default to Skinwalker.txt if it exists, otherwise first file alphabetically
+      let defaultFile = files.find(f => f === 'Skinwalker.txt') || files[0];
       
       files.forEach(file => {
         const option = document.createElement('option');
@@ -560,8 +560,8 @@
         
         // Use a span for text to allow scaling
         if (idx === 12) {
-          // Special text for house.txt
-          const freeText = currentFile === 'house.txt' ? HOUSE_FREE_TEXT : FREE_TEXT;
+          // Special text for House.txt
+          const freeText = currentFile === 'House.txt' ? HOUSE_FREE_TEXT : FREE_TEXT;
           div.innerHTML = `<span class='square-text'>${freeText}</span>`;
         } else {
           div.innerHTML = `<span class='square-text'>${grid[idx]}</span>`;
