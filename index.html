@@ -226,7 +226,6 @@
   <div id="bingo-overlay"><h2>BINGO!</h2></div>
   <canvas id="confetti-canvas"></canvas>
   <script>
-    // Try to load the background image
     const bgImg = new window.Image();
     bgImg.onload = function() {
       document.body.style.background =
@@ -238,7 +237,6 @@
     bgImg.src = "../meemeemee.png";
   </script>
   <script>
-    // Global variables
     let SQUARES = [];
     let currentFile = '';
     let audioContext = null;
@@ -251,7 +249,6 @@
     const bingo = document.getElementById('bingo');
     const fileSelect = document.getElementById('file-select');
 
-    // Helper: shuffle array in-place
     function shuffle(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -260,11 +257,8 @@
       return arr;
     }
 
-    // Get available .txt files from squares directory
     async function getAvailableFiles() {
       try {
-        // Try to fetch a list of files - we'll need to implement this differently
-        // For now, we'll try common file names and see what exists
         const possibleFiles = ['Skinwalker.txt', 'House.txt', 'squares.txt'];
         const availableFiles = [];
         
@@ -275,11 +269,10 @@
               availableFiles.push(file);
             }
           } catch (e) {
-            // File doesn't exist, continue
           }
         }
         
-        // If no files found, try the original squares.txt
+        // default to squares.txt in the absence of any custom showfiles
         if (availableFiles.length === 0) {
           try {
             const response = await fetch('squares.txt');
@@ -298,7 +291,6 @@
       }
     }
 
-    // Load squares from a specific file
     async function loadSquaresFromFile(filename) {
       try {
         const response = await fetch(filename.startsWith('squares/') ? filename : `squares/${filename}`);
@@ -311,7 +303,6 @@
       }
     }
 
-    // Populate dropdown with available files
     async function populateFileSelector() {
       const files = await getAvailableFiles();
       fileSelect.innerHTML = '';
@@ -338,10 +329,8 @@
       await loadAndPopulateBoard(defaultFile);
     }
 
-    // Load audio file
     async function loadAudio() {
       try {
-        // Try to load both kazoo files
         const kazooFiles = ['snd/kazoo1.mp3', 'snd/kazoo2.mp3'];
         const audioBuffers = [];
         
@@ -371,11 +360,9 @@
       }
     }
 
-    // Play random kazoo sound
     function playKazoo() {
       if (audioContext && audioBuffer && audioBuffer.length > 0) {
         try {
-          // Randomly select one of the available kazoo sounds
           const randomIndex = Math.floor(Math.random() * audioBuffer.length);
           const selectedBuffer = audioBuffer[randomIndex];
           
@@ -384,7 +371,7 @@
           source.connect(audioContext.destination);
           source.start(0);
         } catch (error) {
-          console.warn('Could not play kazoo sound:', error);
+          console.warn('BOO, NO KAZOO, NO TOOT FOR YOU!', error);
         }
       }
     }
@@ -438,7 +425,7 @@
       stopConfetti();
     }
 
-    // Confetti animation (simple canvas)
+    // Confetti animation on win
     let confettiTimer = null;
     let confettiParticles = [];
     function startConfetti() {
@@ -496,7 +483,6 @@
       canvas.height = window.innerHeight;
     });
 
-    // Helper to fit text in a square by shrinking font size if needed
     function fitTextToSquare(div) {
       const textEl = div.querySelector('.square-text');
       if (!textEl) return;
@@ -504,7 +490,7 @@
       const isMobile = window.innerWidth <= 600;
       const minFontSize = div.classList.contains('free') ? (isMobile ? 0.8 : 1.0) : (isMobile ? 0.75 : 0.8); // em
       textEl.style.fontSize = fontSize + 'px';
-      // Only shrink if text actually overflows
+
       const maxIterations = isMobile ? 8 : 6;
       for (let i = 0; i < maxIterations; i++) {
         const overflows = textEl.scrollHeight > div.clientHeight - 6 || textEl.scrollWidth > div.clientWidth - 6;
@@ -548,7 +534,6 @@
         squaresEls.push(div);
       }
       
-      // Animation: pop in text in random order
       const order = [...shuffle([...Array(GRID_SIZE * GRID_SIZE).keys()].filter(i => i !== 12)), 12];
       let filled = 0;
       const interval = ANIMATION_DURATION / (GRID_SIZE * GRID_SIZE);
@@ -558,7 +543,6 @@
         const idx = order[filled];
         const div = squaresEls[idx];
         
-        // Use a span for text to allow scaling
         if (idx === 12) {
           // Special text for House.txt
           const freeText = currentFile === 'House.txt' ? HOUSE_FREE_TEXT : FREE_TEXT;
@@ -578,7 +562,6 @@
       
       fillNext();
       
-      // Add click handler for X toggle
       bingo.onclick = function(e) {
         if (bingoActive) return;
         const target = e.target.closest('.square');
@@ -596,7 +579,7 @@
           marked[idx] = true;
         }
         
-        // Always mark center as filled
+        // Always consider FREE SQUARE to have been checked
         marked[12] = true;
         
         if (isBingo(marked)) {
@@ -614,7 +597,6 @@
       }
     });
 
-    // On load
     window.addEventListener('DOMContentLoaded', async () => {
       await loadAudio();
       await populateFileSelector();
